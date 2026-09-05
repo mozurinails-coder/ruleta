@@ -37,6 +37,33 @@ const arc = (2 * Math.PI) / numOpciones;
 let anguloActual = 0;
 let girando = false;
 
+// 🔒 REVISAR SI YA GIRÓ ANTES
+function verificarSiYaGiro() {
+  const usuarioGuardado = localStorage.getItem('ruleta_usuario_ig');
+  const premioGuardado = localStorage.getItem('ruleta_premio');
+
+  if (usuarioGuardado && premioGuardado) {
+    btnGirar.disabled = true;
+    btnGirar.textContent = "Ya participaste";
+    
+    // Deshabilitar los campos de texto
+    const inputNombre = document.getElementById('nombre');
+    if (inputNombre) inputNombre.disabled = true;
+
+    const mensajeWA = encodeURIComponent(`¡Hola! Mi usuario de Instagram es ${usuarioGuardado} y gané: ${premioGuardado}`);
+    const urlWA = `https://wa.me/${TU_NUMERO_WHATSAPP}?text=${mensajeWA}`;
+
+    resultadoDiv.innerHTML = `
+      ⚠️ <strong>Ya utilizaste tu giro disponible.</strong><br>
+      Tu premio asignado fue: <strong>${premioGuardado}</strong><br><br>
+      <a href="${urlWA}" target="_blank" style="display:inline-block; background-color:#25D366; color:white; padding:14px 20px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:16px; box-shadow:0 4px 10px rgba(37,211,102,0.3);">Reclamar Premio por WhatsApp</a>
+    `;
+    resultadoDiv.classList.remove('hidden');
+    return true;
+  }
+  return false;
+}
+
 function dibujarRuleta() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   const centroX = canvas.width / 2;
@@ -87,10 +114,17 @@ function dibujarRuleta() {
 }
 
 dibujarRuleta();
+verificarSiYaGiro();
 
 form.addEventListener('submit', (e) => {
   e.preventDefault();
   if (girando) return;
+
+  // Si ya giró previamente en este celular/pantalla, frena el formulario
+  if (localStorage.getItem('ruleta_premio')) {
+    alert("Ya has participado anteriormente con este dispositivo.");
+    return;
+  }
 
   const usuarioIg = document.getElementById('nombre').value.trim();
   if (!usuarioIg) return;
@@ -111,13 +145,18 @@ form.addEventListener('submit', (e) => {
       requestAnimationFrame(animar);
     } else {
       girando = false;
-      btnGirar.disabled = false;
       
       const gradosTotales = (anguloActual * 180 / Math.PI) % 360;
       let indiceGanador = Math.floor((360 - (gradosTotales % 360) + 270) % 360 / (360 / numOpciones));
       
       const premioGanado = opciones[indiceGanador];
       
+      // 🔒 GUARDAR EN EL NAVEGADOR PARA QUE NO PUEDA VOLVER A GIRAR
+      localStorage.setItem('ruleta_usuario_ig', usuarioIg);
+      localStorage.setItem('ruleta_premio', premioGanado);
+
+      btnGirar.textContent = "Ya participaste";
+
       const mensajeWA = encodeURIComponent(`¡Hola! Mi usuario de Instagram es ${usuarioIg} y giré la ruleta. Gané: ${premioGanado}`);
       const urlWA = `https://wa.me/${TU_NUMERO_WHATSAPP}?text=${mensajeWA}`;
 
