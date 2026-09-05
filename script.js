@@ -39,16 +39,20 @@ const arc = (2 * Math.PI) / numOpciones;
 let anguloActual = 0;
 let girando = false;
 
-// Función para abrir Instagram, copiar el link y DESBLOQUEAR WhatsApp
+// Variable global para guardar el enlace de WhatsApp
+let urlWhatsAppGlobal = "";
+
+// Función para abrir Instagram y DESBLOQUEAR WhatsApp de forma segura
 function compartirEnInstagram() {
   navigator.clipboard.writeText(LINK_PUBLICACION_IG);
   alert("¡Link copiado! Se abrirá Instagram para que subas la captura a tus Historias ✨");
   
-  // Desbloquear botón de WhatsApp
+  // Desbloquear botón de WhatsApp activando su enlace
   const btnWA = document.getElementById('btn-whatsapp');
   if (btnWA) {
+    btnWA.disabled = false;
     btnWA.style.backgroundColor = "#25D366";
-    btnWA.style.pointerEvents = "auto";
+    btnWA.style.cursor = "pointer";
     btnWA.style.opacity = "1";
     btnWA.innerHTML = "2. Reclamar por WhatsApp 💬";
   }
@@ -58,6 +62,13 @@ function compartirEnInstagram() {
   setTimeout(() => {
     window.open(`https://www.instagram.com/${TU_INSTAGRAM}/`, '_blank');
   }, 1000);
+}
+
+// Función para ir a WhatsApp (solo funciona cuando el botón está desbloqueado)
+function irAWhatsApp() {
+  if (urlWhatsAppGlobal) {
+    window.open(urlWhatsAppGlobal, '_blank');
+  }
 }
 
 // 🔒 REVISAR SI YA GIRÓ ANTES
@@ -73,7 +84,7 @@ function verificarSiYaGiro() {
     if (inputNombre) inputNombre.disabled = true;
 
     const mensajeWA = encodeURIComponent(`¡Hola! Mi usuario de Instagram es ${usuarioGuardado} y ya subí la captura a mis Historias. Gané: ${premioGuardado}`);
-    const urlWA = `https://wa.me/${TU_NUMERO_WHATSAPP}?text=${mensajeWA}`;
+    urlWhatsAppGlobal = `https://wa.me/${TU_NUMERO_WHATSAPP}?text=${mensajeWA}`;
 
     resultadoDiv.innerHTML = `
       <div style="background: #ffffff; border: 2px solid #cbd5e1; padding: 18px; border-radius: 14px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
@@ -89,16 +100,16 @@ function verificarSiYaGiro() {
             📸 <strong>Pasos para validar tu premio:</strong><br>
             1. Sácale captura a esta pantalla.<br>
             2. Tocá el botón rosa para subir la historia etiquetando a <strong>@${TU_INSTAGRAM}</strong>.<br>
-            3. El botón de WhatsApp se activará automáticamente al compartir.
+            3. Tocá el botón verde para enviar la captura.
           </p>
-          <button onclick="compartirEnInstagram()" style="background-color: #E1306C; color: white; border: none; padding: 12px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; margin-bottom: 5px;">
+          <button type="button" onclick="compartirEnInstagram()" style="background-color: #E1306C; color: white; border: none; padding: 12px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; margin-bottom: 5px;">
             1. Compartir en Historias 📸
           </button>
         </div>
 
-        <a id="btn-whatsapp" href="${urlWA}" target="_blank" style="display:inline-block; background-color:#94a3b8; color:white; padding:13px 20px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:15px; width: 85%; pointer-events: none; opacity: 0.6; transition: all 0.3s;">
+        <button id="btn-whatsapp" disabled onclick="irAWhatsApp()" style="background-color: #94a3b8; color: white; border: none; padding: 13px 20px; border-radius: 10px; font-weight: bold; font-size: 15px; width: 85%; cursor: not-allowed; opacity: 0.6; transition: all 0.3s;">
           🔒 Primero compartí en Historias
-        </a>
+        </button>
       </div>
     `;
     resultadoDiv.classList.remove('hidden');
@@ -195,7 +206,7 @@ form.addEventListener('submit', (e) => {
       btnGirar.textContent = "Ya participaste";
 
       const mensajeWA = encodeURIComponent(`¡Hola! Mi usuario de Instagram es ${usuarioIg} y ya subí la captura a mis Historias. Gané: ${premioGanado}`);
-      const urlWA = `https://wa.me/${TU_NUMERO_WHATSAPP}?text=${mensajeWA}`;
+      urlWhatsAppGlobal = `https://wa.me/${TU_NUMERO_WHATSAPP}?text=${mensajeWA}`;
 
       resultadoDiv.innerHTML = `
         <div style="background: #ffffff; border: 2px solid #cbd5e1; padding: 18px; border-radius: 14px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
@@ -211,14 +222,14 @@ form.addEventListener('submit', (e) => {
               2. Tocá el botón rosa para abrir tu Instagram y subir la historia etiquetando a <strong>@${TU_INSTAGRAM}</strong>.<br>
               3. Al compartir, se activará el botón verde de WhatsApp.
             </p>
-            <button onclick="compartirEnInstagram()" style="background-color: #E1306C; color: white; border: none; padding: 12px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; margin-bottom: 5px;">
+            <button type="button" onclick="compartirEnInstagram()" style="background-color: #E1306C; color: white; border: none; padding: 12px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; margin-bottom: 5px;">
               1. Compartir en Historias 📸
             </button>
           </div>
 
-          <a id="btn-whatsapp" href="${urlWA}" target="_blank" style="display:inline-block; background-color:#94a3b8; color:white; padding:13px 20px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:15px; width: 85%; pointer-events: none; opacity: 0.6; transition: all 0.3s;">
+          <button id="btn-whatsapp" disabled onclick="irAWhatsApp()" style="background-color: #94a3b8; color: white; border: none; padding: 13px 20px; border-radius: 10px; font-weight: bold; font-size: 15px; width: 85%; cursor: not-allowed; opacity: 0.6; transition: all 0.3s;">
             🔒 Primero compartí en Historias
-          </a>
+          </button>
         </div>
       `;
       resultadoDiv.classList.remove('hidden');
