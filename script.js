@@ -39,13 +39,22 @@ const arc = (2 * Math.PI) / numOpciones;
 let anguloActual = 0;
 let girando = false;
 
-// Función para abrir Instagram y copiar el link
+// Función para abrir Instagram, copiar el link y DESBLOQUEAR WhatsApp
 function compartirEnInstagram() {
   navigator.clipboard.writeText(LINK_PUBLICACION_IG);
-  alert("¡Link de la ruleta copiado! Ahora se abrirá Instagram para que subas tu captura a las Historias ✨");
+  alert("¡Link copiado! Se abrirá Instagram para que subas la captura a tus Historias ✨");
+  
+  // Desbloquear botón de WhatsApp
+  const btnWA = document.getElementById('btn-whatsapp');
+  if (btnWA) {
+    btnWA.style.backgroundColor = "#25D366";
+    btnWA.style.pointerEvents = "auto";
+    btnWA.style.opacity = "1";
+    btnWA.innerHTML = "2. Reclamar por WhatsApp 💬";
+  }
+
   window.location.href = "instagram://story-camera";
   
-  // Respaldo por si no tiene la app instalada o está en PC
   setTimeout(() => {
     window.open(`https://www.instagram.com/${TU_INSTAGRAM}/`, '_blank');
   }, 1000);
@@ -78,17 +87,17 @@ function verificarSiYaGiro() {
         <div style="background: #f8fafc; border: 1px dashed #94a3b8; padding: 12px; border-radius: 10px; margin-bottom: 15px;">
           <p style="font-size: 13px; color: #475569; margin: 0 0 10px 0; line-height: 1.4;">
             📸 <strong>Pasos para validar tu premio:</strong><br>
-            1. Sacale captura a esta pantalla.<br>
-            2. Tocá el botón rosa para abrir tu Instagram y subir la historia etiquetando a <strong>@${TU_INSTAGRAM}</strong>.<br>
-            3. Volvé y tocá el botón verde para enviarnos la captura.
+            1. Sácale captura a esta pantalla.<br>
+            2. Tocá el botón rosa para subir la historia etiquetando a <strong>@${TU_INSTAGRAM}</strong>.<br>
+            3. El botón de WhatsApp se activará automáticamente al compartir.
           </p>
-          <button onclick="compartirEnInstagram()" style="background-color: #E1306C; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 8px;">
+          <button onclick="compartirEnInstagram()" style="background-color: #E1306C; color: white; border: none; padding: 12px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; margin-bottom: 5px;">
             1. Compartir en Historias 📸
           </button>
         </div>
 
-        <a href="${urlWA}" target="_blank" style="display:inline-block; background-color:#25D366; color:white; padding:12px 18px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:15px; width: 85%; box-shadow:0 4px 10px rgba(37,211,102,0.3);">
-          2. Reclamar por WhatsApp 💬
+        <a id="btn-whatsapp" href="${urlWA}" target="_blank" style="display:inline-block; background-color:#94a3b8; color:white; padding:13px 20px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:15px; width: 85%; pointer-events: none; opacity: 0.6; transition: all 0.3s;">
+          🔒 Primero compartí en Historias
         </a>
       </div>
     `;
@@ -200,15 +209,15 @@ form.addEventListener('submit', (e) => {
               📸 <strong>Para validar tu premio:</strong><br>
               1. Sácale una captura a esta pantalla.<br>
               2. Tocá el botón rosa para abrir tu Instagram y subir la historia etiquetando a <strong>@${TU_INSTAGRAM}</strong>.<br>
-              3. Volvé y tocá el botón verde de abajo para enviarnos la captura.
+              3. Al compartir, se activará el botón verde de WhatsApp.
             </p>
             <button onclick="compartirEnInstagram()" style="background-color: #E1306C; color: white; border: none; padding: 12px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; margin-bottom: 5px;">
               1. Compartir en Historias 📸
             </button>
           </div>
 
-          <a href="${urlWA}" target="_blank" style="display:inline-block; background-color:#25D366; color:white; padding:13px 20px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:15px; width: 85%; box-shadow:0 4px 10px rgba(37,211,102,0.3);">
-            2. Reclamar por WhatsApp 💬
+          <a id="btn-whatsapp" href="${urlWA}" target="_blank" style="display:inline-block; background-color:#94a3b8; color:white; padding:13px 20px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:15px; width: 85%; pointer-events: none; opacity: 0.6; transition: all 0.3s;">
+            🔒 Primero compartí en Historias
           </a>
         </div>
       `;
