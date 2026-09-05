@@ -6,8 +6,7 @@ const resultadoDiv = document.getElementById('resultado');
 
 // CONFIGURACIÓN DE TUS REDES
 const TU_NUMERO_WHATSAPP = "542996579303";
-const TU_INSTAGRAM = "mozurinails"; // Tu usuario de Instagram sin @
-const LINK_PUBLICACION_IG = "https://www.instagram.com/p/TU_PUBLICACION_AQUI/"; // Pega aquí el link de tu publicación
+const TU_INSTAGRAM = "mozuri.nails"; // Tu usuario oficial con punto
 
 // Tus 8 premios
 const opciones = [
@@ -38,25 +37,20 @@ const arc = (2 * Math.PI) / numOpciones;
 
 let anguloActual = 0;
 let girando = false;
-
-// Variable global para guardar el enlace de WhatsApp
 let urlWhatsAppGlobal = "";
 
-// Función para abrir Instagram y DESBLOQUEAR WhatsApp de forma segura
+// Función para abrir Instagram y desbloquear WhatsApp
 function compartirEnInstagram() {
-  navigator.clipboard.writeText(LINK_PUBLICACION_IG);
-  alert("¡Link copiado! Se abrirá Instagram para que subas la captura a tus Historias ✨");
-  
-  // Desbloquear botón de WhatsApp activando su enlace
   const btnWA = document.getElementById('btn-whatsapp');
   if (btnWA) {
     btnWA.disabled = false;
     btnWA.style.backgroundColor = "#25D366";
     btnWA.style.cursor = "pointer";
     btnWA.style.opacity = "1";
-    btnWA.innerHTML = "2. Reclamar por WhatsApp 💬";
+    btnWA.innerHTML = "2. Enviar captura por WhatsApp 💬";
   }
 
+  // Intenta abrir el creador de historias o el perfil
   window.location.href = "instagram://story-camera";
   
   setTimeout(() => {
@@ -64,7 +58,6 @@ function compartirEnInstagram() {
   }, 1000);
 }
 
-// Función para ir a WhatsApp (solo funciona cuando el botón está desbloqueado)
 function irAWhatsApp() {
   if (urlWhatsAppGlobal) {
     window.open(urlWhatsAppGlobal, '_blank');
@@ -83,7 +76,7 @@ function verificarSiYaGiro() {
     const inputNombre = document.getElementById('nombre');
     if (inputNombre) inputNombre.disabled = true;
 
-    const mensajeWA = encodeURIComponent(`¡Hola! Mi usuario de Instagram es ${usuarioGuardado} y ya subí la captura a mis Historias. Gané: ${premioGuardado}`);
+    const mensajeWA = encodeURIComponent(`¡Hola! Mi usuario de Instagram es @${usuarioGuardado}. Gané "${premioGuardado}" en la ruleta y aquí te adjunto la captura de mi Historia etiquetando a @${TU_INSTAGRAM}.`);
     urlWhatsAppGlobal = `https://wa.me/${TU_NUMERO_WHATSAPP}?text=${mensajeWA}`;
 
     resultadoDiv.innerHTML = `
@@ -97,18 +90,17 @@ function verificarSiYaGiro() {
         
         <div style="background: #f8fafc; border: 1px dashed #94a3b8; padding: 12px; border-radius: 10px; margin-bottom: 15px;">
           <p style="font-size: 13px; color: #475569; margin: 0 0 10px 0; line-height: 1.4;">
-            📸 <strong>Pasos para validar tu premio:</strong><br>
-            1. Sácale captura a esta pantalla.<br>
-            2. Tocá el botón rosa para subir la historia etiquetando a <strong>@${TU_INSTAGRAM}</strong>.<br>
-            3. Tocá el botón verde para enviar la captura.
+            📸 <strong>Pasos para reclamar:</strong><br>
+            1. Subí la captura a tu historia etiquetando a <strong>@${TU_INSTAGRAM}</strong>.<br>
+            2. Tocá el botón verde y envianos la captura por chat.
           </p>
           <button type="button" onclick="compartirEnInstagram()" style="background-color: #E1306C; color: white; border: none; padding: 12px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; margin-bottom: 5px;">
-            1. Compartir en Historias 📸
+            1. Abrir Instagram para subir Historia 📸
           </button>
         </div>
 
-        <button id="btn-whatsapp" disabled onclick="irAWhatsApp()" style="background-color: #94a3b8; color: white; border: none; padding: 13px 20px; border-radius: 10px; font-weight: bold; font-size: 15px; width: 85%; cursor: not-allowed; opacity: 0.6; transition: all 0.3s;">
-          🔒 Primero compartí en Historias
+        <button id="btn-whatsapp" disabled onclick="irAWhatsApp()" style="background-color: #94a3b8; color: white; border: none; padding: 13px 20px; border-radius: 10px; font-weight: bold; font-size: 15px; width: 100%; cursor: not-allowed; opacity: 0.6; transition: all 0.3s;">
+          🔒 Primero abrí Instagram
         </button>
       </div>
     `;
@@ -154,6 +146,7 @@ function dibujarRuleta() {
     ctx.restore();
   }
 
+  // Círculo central decorativo
   ctx.beginPath();
   ctx.arc(centroX, centroY, 28, 0, 2 * Math.PI);
   ctx.fillStyle = "#ffffff";
@@ -182,35 +175,49 @@ form.addEventListener('submit', (e) => {
   btnGirar.disabled = true;
   resultadoDiv.classList.add('hidden');
 
-  let velocidad = Math.random() * 8 + 22;
-  const desaceleracion = 0.985;
+  // 1. Seleccionar ganador 100% al azar entre las 8 opciones
+  const indiceGanador = Math.floor(Math.random() * numOpciones);
+  const premioGanado = opciones[indiceGanador];
 
-  function animar() {
-    velocidad *= desaceleracion;
-    anguloActual += (velocidad * Math.PI) / 180;
-    dibujarRuleta();
+  // 2. Calcular el ángulo exacto para que frene alineado con la flecha superior
+  const anguloSector = (2 * Math.PI) / numOpciones;
+  const anguloObjetivoSector = (3 * Math.PI / 2) - (indiceGanador * anguloSector) - (anguloSector / 2);
 
-    if (velocidad > 0.05) {
-      requestAnimationFrame(animar);
+  // Entre 5 y 8 vueltas de giro
+  const vueltasCompletas = (Math.floor(Math.random() * 4) + 5) * 2 * Math.PI;
+  const anguloFinal = vueltasCompletas + anguloObjetivoSector;
+
+  let tiempoInicio = null;
+  const duracionAnimacion = 4500; // 4.5 segundos
+
+  function animarRuleta(timestamp) {
+    if (!tiempoInicio) tiempoInicio = timestamp;
+    const progreso = (timestamp - tiempoInicio) / duracionAnimacion;
+
+    if (progreso < 1) {
+      // Curva de frenado progresivo (Ease-Out)
+      const easeOut = 1 - Math.pow(1 - progreso, 3);
+      anguloActual = easeOut * anguloFinal;
+      dibujarRuleta();
+      requestAnimationFrame(animarRuleta);
     } else {
+      // Final de la animación
+      anguloActual = anguloFinal % (2 * Math.PI);
+      dibujarRuleta();
       girando = false;
-      
-      const gradosTotales = (anguloActual * 180 / Math.PI) % 360;
-      let indiceGanador = Math.floor((360 - (gradosTotales % 360) + 270) % 360 / (360 / numOpciones));
-      
-      const premioGanado = opciones[indiceGanador];
-      
+
+      // Guardar participación en el navegador
       localStorage.setItem('ruleta_usuario_ig', usuarioIg);
       localStorage.setItem('ruleta_premio', premioGanado);
 
       btnGirar.textContent = "Ya participaste";
 
-      const mensajeWA = encodeURIComponent(`¡Hola! Mi usuario de Instagram es ${usuarioIg} y ya subí la captura a mis Historias. Gané: ${premioGanado}`);
+      const mensajeWA = encodeURIComponent(`¡Hola! Mi usuario de Instagram es @${usuarioIg}. Gané "${premioGanado}" en la ruleta y aquí te adjunto la captura de mi Historia etiquetando a @${TU_INSTAGRAM}.`);
       urlWhatsAppGlobal = `https://wa.me/${TU_NUMERO_WHATSAPP}?text=${mensajeWA}`;
 
       resultadoDiv.innerHTML = `
         <div style="background: #ffffff; border: 2px solid #cbd5e1; padding: 18px; border-radius: 14px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
-          <h3 style="margin-top: 0; color: #122D52; font-size: 20px;">🎉 ¡Felicidades <strong>${usuarioIg}</strong>!</h3>
+          <h3 style="margin-top: 0; color: #122D52; font-size: 20px;">🎉 ¡Felicidades @<strong>${usuarioIg}</strong>!</h3>
           <p style="font-size: 18px; margin: 8px 0; color: #0f172a;">Ganaste: <strong>${premioGanado}</strong></p>
           
           <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 12px 0;">
@@ -218,17 +225,17 @@ form.addEventListener('submit', (e) => {
           <div style="background: #f8fafc; border: 1px dashed #49688F; padding: 12px; border-radius: 10px; margin-bottom: 15px;">
             <p style="font-size: 14px; color: #334155; margin: 0 0 10px 0; line-height: 1.4;">
               📸 <strong>Para validar tu premio:</strong><br>
-              1. Sácale una captura a esta pantalla.<br>
-              2. Tocá el botón rosa para abrir tu Instagram y subir la historia etiquetando a <strong>@${TU_INSTAGRAM}</strong>.<br>
-              3. Al compartir, se activará el botón verde de WhatsApp.
+              1. Sácale captura a esta pantalla.<br>
+              2. Tocá el botón rosa para abrir Instagram y subir la historia etiquetando a <strong>@${TU_INSTAGRAM}</strong>.<br>
+              3. Al tocarlo, se activará el botón verde para enviarnos el comprobante por WhatsApp.
             </p>
             <button type="button" onclick="compartirEnInstagram()" style="background-color: #E1306C; color: white; border: none; padding: 12px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; margin-bottom: 5px;">
-              1. Compartir en Historias 📸
+              1. Abrir Instagram para subir Historia 📸
             </button>
           </div>
 
-          <button id="btn-whatsapp" disabled onclick="irAWhatsApp()" style="background-color: #94a3b8; color: white; border: none; padding: 13px 20px; border-radius: 10px; font-weight: bold; font-size: 15px; width: 85%; cursor: not-allowed; opacity: 0.6; transition: all 0.3s;">
-            🔒 Primero compartí en Historias
+          <button id="btn-whatsapp" disabled onclick="irAWhatsApp()" style="background-color: #94a3b8; color: white; border: none; padding: 13px 20px; border-radius: 10px; font-weight: bold; font-size: 15px; width: 100%; cursor: not-allowed; opacity: 0.6; transition: all 0.3s;">
+            🔒 Primero abrí Instagram
           </button>
         </div>
       `;
@@ -236,5 +243,5 @@ form.addEventListener('submit', (e) => {
     }
   }
 
-  animar();
+  requestAnimationFrame(animarRuleta);
 });
