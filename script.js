@@ -4,8 +4,10 @@ const form = document.getElementById('form-ruleta');
 const btnGirar = document.getElementById('btn-girar');
 const resultadoDiv = document.getElementById('resultado');
 
-// TU NÚMERO DE WHATSAPP
+// CONFIGURACIÓN DE TUS REDES
 const TU_NUMERO_WHATSAPP = "542996579303";
+const TU_INSTAGRAM = "mozurinails"; // Tu usuario de Instagram sin @
+const LINK_PUBLICACION_IG = "https://www.instagram.com/p/TU_PUBLICACION_AQUI/"; // Pega aquí el link de tu publicación
 
 // Tus 8 premios
 const opciones = [
@@ -37,6 +39,18 @@ const arc = (2 * Math.PI) / numOpciones;
 let anguloActual = 0;
 let girando = false;
 
+// Función para abrir Instagram y copiar el link
+function compartirEnInstagram() {
+  navigator.clipboard.writeText(LINK_PUBLICACION_IG);
+  alert("¡Link de la ruleta copiado! Ahora se abrirá Instagram para que subas tu captura a las Historias ✨");
+  window.location.href = "instagram://story-camera";
+  
+  // Respaldo por si no tiene la app instalada o está en PC
+  setTimeout(() => {
+    window.open(`https://www.instagram.com/${TU_INSTAGRAM}/`, '_blank');
+  }, 1000);
+}
+
 // 🔒 REVISAR SI YA GIRÓ ANTES
 function verificarSiYaGiro() {
   const usuarioGuardado = localStorage.getItem('ruleta_usuario_ig');
@@ -46,17 +60,37 @@ function verificarSiYaGiro() {
     btnGirar.disabled = true;
     btnGirar.textContent = "Ya participaste";
     
-    // Deshabilitar los campos de texto
     const inputNombre = document.getElementById('nombre');
     if (inputNombre) inputNombre.disabled = true;
 
-    const mensajeWA = encodeURIComponent(`¡Hola! Mi usuario de Instagram es ${usuarioGuardado} y gané: ${premioGuardado}`);
+    const mensajeWA = encodeURIComponent(`¡Hola! Mi usuario de Instagram es ${usuarioGuardado} y ya subí la captura a mis Historias. Gané: ${premioGuardado}`);
     const urlWA = `https://wa.me/${TU_NUMERO_WHATSAPP}?text=${mensajeWA}`;
 
     resultadoDiv.innerHTML = `
-      ⚠️ <strong>Ya utilizaste tu giro disponible.</strong><br>
-      Tu premio asignado fue: <strong>${premioGuardado}</strong><br><br>
-      <a href="${urlWA}" target="_blank" style="display:inline-block; background-color:#25D366; color:white; padding:14px 20px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:16px; box-shadow:0 4px 10px rgba(37,211,102,0.3);">Reclamar Premio por WhatsApp</a>
+      <div style="background: #ffffff; border: 2px solid #cbd5e1; padding: 18px; border-radius: 14px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+        <p style="margin: 0 0 10px 0; color: #e11d48; font-weight: bold; font-size: 15px;">
+          ⚠️ Ya utilizaste tu giro disponible.
+        </p>
+        <p style="font-size: 17px; color: #1e293b; margin: 0 0 15px 0;">
+          Tu premio asignado fue: <strong>${premioGuardado}</strong>
+        </p>
+        
+        <div style="background: #f8fafc; border: 1px dashed #94a3b8; padding: 12px; border-radius: 10px; margin-bottom: 15px;">
+          <p style="font-size: 13px; color: #475569; margin: 0 0 10px 0; line-height: 1.4;">
+            📸 <strong>Pasos para validar tu premio:</strong><br>
+            1. Sacale captura a esta pantalla.<br>
+            2. Tocá el botón rosa para abrir tu Instagram y subir la historia etiquetando a <strong>@${TU_INSTAGRAM}</strong>.<br>
+            3. Volvé y tocá el botón verde para enviarnos la captura.
+          </p>
+          <button onclick="compartirEnInstagram()" style="background-color: #E1306C; color: white; border: none; padding: 10px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 8px;">
+            1. Compartir en Historias 📸
+          </button>
+        </div>
+
+        <a href="${urlWA}" target="_blank" style="display:inline-block; background-color:#25D366; color:white; padding:12px 18px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:15px; width: 85%; box-shadow:0 4px 10px rgba(37,211,102,0.3);">
+          2. Reclamar por WhatsApp 💬
+        </a>
+      </div>
     `;
     resultadoDiv.classList.remove('hidden');
     return true;
@@ -73,19 +107,16 @@ function dibujarRuleta() {
   for (let i = 0; i < numOpciones; i++) {
     const angulo = anguloActual + i * arc;
     
-    // Dibujar Sector
     ctx.fillStyle = colores[i];
     ctx.beginPath();
     ctx.arc(centroX, centroY, radio, angulo, angulo + arc, false);
     ctx.lineTo(centroX, centroY);
     ctx.fill();
 
-    // Borde blanco entre secciones
     ctx.strokeStyle = "#ffffff";
     ctx.lineWidth = 3;
     ctx.stroke();
 
-    // Dibujar Texto
     ctx.save();
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 17px Segoe UI, sans-serif";
@@ -103,7 +134,6 @@ function dibujarRuleta() {
     ctx.restore();
   }
 
-  // Círculo central decorativo
   ctx.beginPath();
   ctx.arc(centroX, centroY, 28, 0, 2 * Math.PI);
   ctx.fillStyle = "#ffffff";
@@ -120,7 +150,6 @@ form.addEventListener('submit', (e) => {
   e.preventDefault();
   if (girando) return;
 
-  // Si ya giró previamente en este celular/pantalla, frena el formulario
   if (localStorage.getItem('ruleta_premio')) {
     alert("Ya has participado anteriormente con este dispositivo.");
     return;
@@ -151,19 +180,37 @@ form.addEventListener('submit', (e) => {
       
       const premioGanado = opciones[indiceGanador];
       
-      // 🔒 GUARDAR EN EL NAVEGADOR PARA QUE NO PUEDA VOLVER A GIRAR
       localStorage.setItem('ruleta_usuario_ig', usuarioIg);
       localStorage.setItem('ruleta_premio', premioGanado);
 
       btnGirar.textContent = "Ya participaste";
 
-      const mensajeWA = encodeURIComponent(`¡Hola! Mi usuario de Instagram es ${usuarioIg} y giré la ruleta. Gané: ${premioGanado}`);
+      const mensajeWA = encodeURIComponent(`¡Hola! Mi usuario de Instagram es ${usuarioIg} y ya subí la captura a mis Historias. Gané: ${premioGanado}`);
       const urlWA = `https://wa.me/${TU_NUMERO_WHATSAPP}?text=${mensajeWA}`;
 
       resultadoDiv.innerHTML = `
-        🎉 ¡Felicidades <strong>${usuarioIg}</strong>!<br>
-        Ganaste: <strong>${premioGanado}</strong><br><br>
-        <a href="${urlWA}" target="_blank" style="display:inline-block; background-color:#25D366; color:white; padding:14px 20px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:16px; box-shadow:0 4px 10px rgba(37,211,102,0.3);">Reclamar Premio por WhatsApp</a>
+        <div style="background: #ffffff; border: 2px solid #cbd5e1; padding: 18px; border-radius: 14px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+          <h3 style="margin-top: 0; color: #122D52; font-size: 20px;">🎉 ¡Felicidades <strong>${usuarioIg}</strong>!</h3>
+          <p style="font-size: 18px; margin: 8px 0; color: #0f172a;">Ganaste: <strong>${premioGanado}</strong></p>
+          
+          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 12px 0;">
+
+          <div style="background: #f8fafc; border: 1px dashed #49688F; padding: 12px; border-radius: 10px; margin-bottom: 15px;">
+            <p style="font-size: 14px; color: #334155; margin: 0 0 10px 0; line-height: 1.4;">
+              📸 <strong>Para validar tu premio:</strong><br>
+              1. Sácale una captura a esta pantalla.<br>
+              2. Tocá el botón rosa para abrir tu Instagram y subir la historia etiquetando a <strong>@${TU_INSTAGRAM}</strong>.<br>
+              3. Volvé y tocá el botón verde de abajo para enviarnos la captura.
+            </p>
+            <button onclick="compartirEnInstagram()" style="background-color: #E1306C; color: white; border: none; padding: 12px 15px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 14px; margin-bottom: 5px;">
+              1. Compartir en Historias 📸
+            </button>
+          </div>
+
+          <a href="${urlWA}" target="_blank" style="display:inline-block; background-color:#25D366; color:white; padding:13px 20px; border-radius:10px; text-decoration:none; font-weight:bold; font-size:15px; width: 85%; box-shadow:0 4px 10px rgba(37,211,102,0.3);">
+            2. Reclamar por WhatsApp 💬
+          </a>
+        </div>
       `;
       resultadoDiv.classList.remove('hidden');
     }
